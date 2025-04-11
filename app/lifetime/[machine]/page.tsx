@@ -4,35 +4,40 @@ import Tabs from "@/components/Tabs";
 import MachineDataTable from "@/components/MachineDataTable";
 import { machineConfig } from "@/app/api/config/machines";
 import { notFound } from "next/navigation";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 
+// Machine-specific tab configurations
 const machineTabs = {
   ilapak: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
   sig: ["5", "6"],
   chimei: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
   jinsung: ["1", "2", "3", "4", "5"],
-  unifil: ["A", "B"],
+  unifill: ["A", "B"],
 };
 
 export default function MachinePage() {
   const params = useParams();
-  const machine = params.machine as string;
+  const searchParams = useSearchParams();
+  const machineName = params.machine as string;
 
-  if (!machine || !machineConfig[machine.toLowerCase()]) {
+  // Check if the machine exists in our config
+  if (!machineName || !machineConfig[machineName.toLowerCase()]) {
     return notFound();
   }
 
-  const machineName = machine.toLowerCase();
-  const tabs = machineTabs[machineName as keyof typeof machineTabs];
+  const machine = machineName.toLowerCase();
+  const tabs = machineTabs[machine as keyof typeof machineTabs] || ["1"];
+  const machineNumber = searchParams.get("tab") || tabs[0]; // Default to first tab if none selected
 
   return (
-    <section>
+    <section className="flex items-center flex-col">
+      {/* Tabs */}
       <Tabs
         tabs={tabs}
-        basePath={`/lifetime/${machineName}`}
-        labelPrefix={`${machineName.toUpperCase()}`}
+        basePath={`/lifetime/${machine}`}
+        labelPrefix={machine.toUpperCase()}
       />
-      <MachineDataTable machineName={machineName} />
+      <MachineDataTable machineName={machine} machineNumber={machineNumber} />
     </section>
   );
 }
