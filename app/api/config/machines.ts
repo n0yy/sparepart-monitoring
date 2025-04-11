@@ -11,7 +11,7 @@ export const machineConfig: Record<string, { worksheetName: string }> = {
   jinsung: {
     worksheetName: "JINSUNG",
   },
-  unifil: {
-    worksheetName: "UNIFIL",
+  unifill: {
+    worksheetName: "UNIFILL",
   },
 };

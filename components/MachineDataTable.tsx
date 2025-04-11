@@ -21,6 +21,7 @@ export default function MachineDataTable({
             <table className="table table-sm table-zebra w-full mt-4">
               <thead>
                 <tr>
+                  <th>Mesin</th>
                   <th>Kode Part</th>
                   <th>Part</th>
                   <th>Qty</th>
@@ -33,9 +34,10 @@ export default function MachineDataTable({
               </thead>
               <tbody>
                 {spreadsheetData!.data
-                  .filter((row) => row.machine) // Filter out empty rows
+                  .filter((row) => row.machine)
                   .map((row, index) => (
                     <tr key={index}>
+                      <td>{row.machine}</td>
                       <td>{row.codePart}</td>
                       <td>{row.part}</td>
                       <td>{row.quantity}</td>

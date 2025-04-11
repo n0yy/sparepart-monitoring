@@ -12,12 +12,10 @@ interface NavLinkProps {
 export default function Sidebar() {
   const pathname = usePathname();
 
-  // Fungsi untuk memeriksa apakah link sedang aktif
   const isActive = (path: string) => {
     return pathname === path || pathname.startsWith(path + "/");
   };
 
-  // Komponen untuk link dengan status aktif
   const NavLink = ({ href, children }: NavLinkProps) => {
     const active = isActive(href);
     return (
@@ -33,7 +31,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="shadow-xl w-[15%] min-h-screen p-4">
+    <aside className="shadow-xl w-[20%] min-h-screen p-4">
       <header className="">
         <Image
           src={"/vercel.svg"}
@@ -62,7 +60,7 @@ export default function Sidebar() {
                   <NavLink href="/lifetime/chimei">Chimei</NavLink>
                 </li>
                 <li>
-                  <NavLink href="/lifetime/unifil">Unifil</NavLink>
+                  <NavLink href="/lifetime/unifill">Unifill</NavLink>
                 </li>
                 <li>
                   <NavLink href="/lifetime/jinsung">Jinsung</NavLink>
