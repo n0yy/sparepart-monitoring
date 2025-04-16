@@ -34,53 +34,49 @@ export default function Sidebar() {
     <aside className="shadow-xl w-[20%] min-h-screen p-4">
       <header className="">
         <Image
-          src={"/vercel.svg"}
-          alt="Vercel Logo"
-          width={60}
-          height={24}
-          className="dark:invert mb-2"
+          src={"/b7_logo.png"}
+          alt="Bintang Toedjoe Logo"
+          width={400}
+          height={300}
         />
-        <h1 className="text-xl font-bold uppercase">Dashboard Lifetime</h1>
       </header>
       {/* Menu */}
-      <div className="mt-10">
-        <ul className="menu rounded-box w-56 space-y-2 bg-base-100 p-4">
+      <div className="">
+        <ul className="menu rounded-box w-80 space-y-2 bg-base-100 p-4">
           {/* ITEM 1: Lifetime Dropdown */}
           <li>
             <details open={pathname.includes("/lifetime")}>
-              <summary className="font-semibold">Lifetime</summary>
+              <summary className="font-semibold">Lifetime Sparepart</summary>
               <ul className="uppercase space-y-1">
                 <li>
-                  <NavLink href="/lifetime/ilapak">Ilapak</NavLink>
+                  <NavLink href="/dashboard/lifetime/ilapak">Ilapak</NavLink>
                 </li>
                 <li>
-                  <NavLink href="/lifetime/sig">SIG</NavLink>
+                  <NavLink href="/dashboard/lifetime/sig">SIG</NavLink>
                 </li>
                 <li>
-                  <NavLink href="/lifetime/chimei">Chimei</NavLink>
+                  <NavLink href="/dashboard/lifetime/chimei">Chimei</NavLink>
                 </li>
                 <li>
-                  <NavLink href="/lifetime/unifill">Unifill</NavLink>
+                  <NavLink href="/dashboard/lifetime/unifill">Unifill</NavLink>
                 </li>
                 <li>
-                  <NavLink href="/lifetime/jinsung">Jinsung</NavLink>
+                  <NavLink href="/dashboard/lifetime/jinsung">Jinsung</NavLink>
                 </li>
               </ul>
             </details>
           </li>
           {/* ITEM 2 */}
           <li>
-            <NavLink href="/kanban">Kanban</NavLink>
+            <NavLink href="/kanban">Kanban Sparepart</NavLink>
           </li>
           {/* ITEM 3 */}
           <li>
-            <NavLink href="/monitoring-expanse">Monitoring Expanse</NavLink>
+            <NavLink href="/monitoring-expanse">
+              Monitoring Sparepart Expense
+            </NavLink>
           </li>
           {/* ITEM 4 */}
-          <li>
-            <NavLink href="/kolaborasi-ckg-pg">Kolaborasi CKG & PG</NavLink>
-          </li>
-          {/* ITEM 5 */}
           <li>
             <NavLink href="/cmms">CMMS</NavLink>
           </li>

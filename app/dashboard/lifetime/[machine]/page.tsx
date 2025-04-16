@@ -2,6 +2,7 @@
 
 import Tabs from "@/components/Tabs";
 import MachineDataTable from "@/components/MachineDataTable";
+import MachineSummary from "@/components/MachineSummary";
 import { machineConfig } from "@/app/api/config/machines";
 import { notFound } from "next/navigation";
 import { useParams, useSearchParams } from "next/navigation";
@@ -27,17 +28,24 @@ export default function MachinePage() {
 
   const machine = machineName.toLowerCase();
   const tabs = machineTabs[machine as keyof typeof machineTabs] || ["1"];
-  const machineNumber = searchParams.get("tab") || tabs[0]; // Default to first tab if none selected
+  const machineNumber = searchParams.get("tab") || tabs[0];
 
   return (
-    <section className="flex items-center flex-col">
+    <section className="flex items-center flex-col p-10">
       {/* Tabs */}
       <Tabs
         tabs={tabs}
         basePath={`/lifetime/${machine}`}
         labelPrefix={machine.toUpperCase()}
       />
-      <MachineDataTable machineName={machine} machineNumber={machineNumber} />
+      {/* Summary */}
+      <div className="w-full max-w-4xl mt-8">
+        <MachineSummary machineName={machine} />
+      </div>
+      {/* Data Table */}
+      <div className="w-full max-w-4xl mt-8">
+        <MachineDataTable machineName={machine} machineNumber={machineNumber} />
+      </div>
     </section>
   );
 }
