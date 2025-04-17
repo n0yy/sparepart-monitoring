@@ -35,7 +35,7 @@ export async function fetchSheetData(
     const data = rows.map((row: GoogleSpreadsheetRow) => ({
       machine: row.get("Mesin"),
       codePart: row.get("Kode Part"),
-      part: row.get("T'r Part"),
+      part: row.get("Part"),
       quantity: row.get("Qty"),
       category: row.get("Category"),
       lastReplaced: row.get("Penggantian Terakhir"),

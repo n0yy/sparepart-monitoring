@@ -12,12 +12,12 @@ interface TabsProps {
 
 export default function Tabs({ tabs, basePath, labelPrefix = "" }: TabsProps) {
   const searchParams = useSearchParams();
-  const activeTab = searchParams.get("tab") || "1";
+  const activeTab = searchParams.get("machine") || "1";
   console.log(tabs);
   const createQueryString = useCallback(
     (tab: string) => {
       const params = new URLSearchParams(searchParams);
-      params.set("tab", tab);
+      params.set("machine", tab);
       return params;
     },
     [searchParams]
