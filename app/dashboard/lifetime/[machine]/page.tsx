@@ -1,39 +1,16 @@
 "use client";
 
-import Tabs from "@/components/Tabs";
-import SparepartStatus from "@/components/SparepartStatus";
-import { machineConfig } from "@/app/api/config/machines";
 import { notFound } from "next/navigation";
 import { useParams, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { machineConfig } from "@/app/api/config/machines";
 import { useMachineData } from "@/hooks/useMachineData";
-import {
-  PieChart,
-  Pie,
-  BarChart,
-  Bar,
-  Legend,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import Tabs from "@/components/Tabs";
+import SparepartStats from "@/components/sparepart/SparepartStats";
+import SparepartDistribution from "@/components/sparepart/SparepartDistribution";
+import OverdueNotifications from "@/components/sparepart/OverdueNotifications";
+import TotalSparepartModal from "@/components/sparepart/TotalSparepartModal";
 
-import { RiHourglass2Fill } from "react-icons/ri";
-import { FaGear } from "react-icons/fa6";
-import { FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
-
-interface SparepartRow {
-  machine: string;
-  codePart: string;
-  part: string;
-  quantity: string;
-  category: string;
-  lastReplaced: string;
-  lifetime: string;
-  nextReplacement: string;
-  status: string;
-}
-
-// Machine-specific tab configurations
 const machineTabs = {
   ilapak: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
   sig: ["5", "6"],
@@ -46,90 +23,16 @@ export default function MachinePage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const machineName = params.machine as string;
+  const machine = machineName?.toLowerCase();
   const { data: spreadsheetData } = useMachineData(machineName);
+  const [openTotalSparepart, setOpenTotalSparepart] = useState(false);
 
-  // Check if the machine exists in our config
-  if (!machineName || !machineConfig[machineName.toLowerCase()]) {
+  if (!machineName || !machineConfig[machine]) {
     return notFound();
   }
 
-  const machine = machineName.toLowerCase();
   const tabs = machineTabs[machine as keyof typeof machineTabs] || ["1"];
   const machineNumber = searchParams.get("machine") || tabs[0];
-  console.log("From Dashboard Lifetime : ", machineNumber);
-  // Total Sparepart
-  const totalSparepart = (spreadsheetData: {
-    data?: SparepartRow[];
-  }): number => {
-    return (
-      spreadsheetData?.data?.filter((row: SparepartRow) => {
-        if (
-          !("lastReplaced" in row) ||
-          !("lifetime" in row) ||
-          row.machine !== `${machine.toUpperCase()} ${machineNumber}`
-        ) {
-          return false;
-        }
-        return true;
-      }).length || 0
-    );
-  };
-
-  // Sparepart Akan Habis Umur (<14 hari)
-  const sparepartWillExpire = (spreadsheetData: {
-    data?: SparepartRow[];
-  }): number => {
-    const today = new Date();
-    return (
-      spreadsheetData?.data?.filter((row: SparepartRow) => {
-        if (
-          !("lastReplaced" in row) ||
-          !("lifetime" in row) ||
-          row.machine !== `${machine.toUpperCase()} ${machineNumber}`
-        )
-          return false;
-
-        const nextReplacementDate = new Date(row.nextReplacement);
-        const timeDiff = nextReplacementDate.getTime() - today.getTime();
-        const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-        return daysDiff <= 14;
-      }).length || 0
-    );
-  };
-
-  // Sparepart Overdue
-  const sparepartOverdue = (spreadsheetData: {
-    data?: SparepartRow[];
-  }): number => {
-    return (
-      spreadsheetData?.data?.filter((row: SparepartRow) => {
-        if (
-          !("lastReplaced" in row) ||
-          !("lifetime" in row) ||
-          row.machine !== `${machine.toUpperCase()} ${machineNumber}`
-        )
-          return false;
-        return row.status === "Melewati Jadwal Penggantian";
-      }).length || 0
-    );
-  };
-
-  // Sparepart OK
-  const sparepartOK = (spreadsheetData: { data?: SparepartRow[] }): number => {
-    return (
-      spreadsheetData?.data?.filter((row: SparepartRow) => {
-        if (
-          !("lastReplaced" in row) ||
-          !("lifetime" in row) ||
-          !("status" in row) ||
-          row.machine !== `${machine.toUpperCase()} ${machineNumber}`
-        ) {
-          return false;
-        }
-        return row.status.includes("Hari Lagi");
-      }).length || 0
-    );
-  };
 
   return (
     <section className="flex items-center flex-col p-10">
@@ -139,88 +42,38 @@ export default function MachinePage() {
         basePath={`/dashboard/lifetime/${machine}`}
         labelPrefix={machine.toUpperCase()}
       />
-      {/* Summary */}
-      <div className="w-full flex flex-wrap items-center justify-center mt-8 gap-4">
-        {/* Total Sparepart */}
-        <SparepartStatus
-          title="Total Sparepart Terpantau"
-          machineName={machine}
+
+      {/* Summary Stats */}
+      <SparepartStats
+        machine={machine}
+        machineNumber={machineNumber}
+        spreadsheetData={spreadsheetData!}
+        onOpenTotalSparepart={() => setOpenTotalSparepart(true)}
+      />
+
+      {/* Total Sparepart Modal */}
+      {openTotalSparepart && (
+        <TotalSparepartModal
+          machine={machine}
           machineNumber={machineNumber}
-          calcFunc={totalSparepart}
-          icon={<FaGear size={40} className="text-neutral" />}
+          spreadsheetData={spreadsheetData!}
+          onClose={() => setOpenTotalSparepart(false)}
         />
-        {/* Sparepart Akan Habis Umur (<14 hari) */}
-        <SparepartStatus
-          title="Sparepart Akan Habis Umur"
-          subtitle="(<14 hari)"
-          machineName={machine}
-          machineNumber={machineNumber}
-          calcFunc={sparepartWillExpire}
-          icon={<RiHourglass2Fill size={40} />}
-        />
-        <SparepartStatus
-          title="Sparepart Overdue"
-          machineName={machine}
-          machineNumber={machineNumber}
-          calcFunc={sparepartOverdue}
-          icon={<FaExclamationTriangle size={32} />}
-        />
-        <SparepartStatus
-          title="Sparepart Aktif (OK)"
-          machineName={machine}
-          machineNumber={machineNumber}
-          calcFunc={sparepartOK}
-          icon={<FaCheckCircle size={32} />}
-        />
-      </div>
-      {/* Visualization */}
+      )}
+
+      {/* Visualization Section */}
       <section className="flex justify-between mt-10">
-        <div className="w-full h-full flex flex-col items-center scale-[80%]">
-          <h2 className="text-4xl font-bold mb-4 text-neutral">
-            Distribusi Status Sparepart
-          </h2>
-          <PieChart width={500} height={400}>
-            <Pie
-              dataKey="value"
-              data={[
-                {
-                  name: "Overdue",
-                  value: spreadsheetData
-                    ? (sparepartOverdue(spreadsheetData) /
-                        totalSparepart(spreadsheetData)) *
-                      100
-                    : 0,
-                  fill: "#6CE5E8",
-                },
-                {
-                  name: "OK",
-                  value: spreadsheetData
-                    ? (sparepartOK(spreadsheetData) /
-                        totalSparepart(spreadsheetData)) *
-                      100
-                    : 0,
-                  fill: "#2D8BBA",
-                },
-                {
-                  name: "Perlu Diganti",
-                  value: spreadsheetData
-                    ? (sparepartWillExpire(spreadsheetData) /
-                        totalSparepart(spreadsheetData)) *
-                      100
-                    : 0,
-                  fill: "#2F5F98",
-                },
-              ]}
-              cx="50%"
-              cy="50%"
-              outerRadius={150}
-              isAnimationActive={false}
-              label={({ percent }) => `${(percent * 100).toFixed(1)}%`}
-            />
-            <Tooltip />
-            <Legend />
-          </PieChart>
-        </div>
+        <SparepartDistribution
+          machine={machine}
+          machineNumber={machineNumber}
+          spreadsheetData={spreadsheetData!}
+        />
+
+        <OverdueNotifications
+          machine={machine}
+          machineNumber={machineNumber}
+          spreadsheetData={spreadsheetData!}
+        />
       </section>
     </section>
   );

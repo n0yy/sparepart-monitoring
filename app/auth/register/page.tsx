@@ -1,10 +1,16 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Register() {
   return (
-    <section>
+    <section className="flex items-center justify-evenly h-screen">
+      {/* Background Image */}
+      <div className="w-6/12">
+        <Image src="/b7_logo.png" alt="logo" width={220} height={105} />
+        <Image src="/images/register.png" alt="tayo" width={500} height={500} />
+      </div>
       {/* Login Form */}
-      <form className="flex flex-col gap-5">
+      <form className="flex flex-col gap-5 w-1/4 bg-slate-100 shadow-xl rounded-xl p-10">
         <header className="mb-5 flex flex-col gap-3 text-start">
           <h1 className="text-4xl font-bold text-gray-800">Register</h1>
           <p className="text-gray-500 max-w-xs">

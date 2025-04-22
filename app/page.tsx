@@ -1,12 +1,23 @@
 import Card from "@/components/Card";
 import Footer from "@/components/Footer";
+import Image from "next/image";
 import Link from "next/link";
 import { AiOutlineLogin } from "react-icons/ai";
 
 export default function Home() {
   return (
     <>
-      <section className="w-full min-h-screen flex justify-center items-center">
+      <section className="w-full min-h-screen flex flex-col justify-center relative">
+        <div className="flex justify-between items-center w-full absolute top-0 left-0 bg-[#efefef] shadow-md px-20">
+          <Image src="/b7_logo.png" alt="logo" width={200} height={100} />
+          <Link
+            href="/auth/login"
+            className="text-primary-content hover:text-primary transition-all duration-100 flex items-center"
+          >
+            Login
+            <AiOutlineLogin size={21} className="ml-2 mt-1" />
+          </Link>
+        </div>
         <div className="flex flex-col items-center gap-4">
           <h1 className="text-5xl font-bold mb-5">
             Welcome to Engineering Pulogadung
@@ -35,13 +46,6 @@ export default function Home() {
               link="/tracking-sparepart-for-smarter-operations"
             />
           </div>
-          <Link
-            href="/auth/login"
-            className="absolute top-10 right-10 flex items-center text-primary-content hover:text-primary transition-all duration-100"
-          >
-            Login
-            <AiOutlineLogin size={21} className="ml-2 mt-1" />
-          </Link>
         </div>
       </section>
       <Footer />
