@@ -15,15 +15,12 @@ interface MachineSummaryProps {
 export default function SparepartStatus({
   title,
   machineName,
-  machineNumber,
   subtitle,
   calcFunc,
   icon,
 }: MachineSummaryProps) {
   const { data: spreadsheetData, loading, error } = useMachineData(machineName);
-  const params = useParams();
-  const machine = params.machine as string;
-
+  console.log(spreadsheetData);
   if (loading)
     return (
       <div className="w-[260px] h-[180px] rounded-2xl bg-[#E0E5EC] shadow-[8px_8px_16px_#a3b1c6,-8px_-8px_16px_#ffffff] animate-pulse" />
@@ -32,7 +29,7 @@ export default function SparepartStatus({
   if (error)
     return (
       <div className="w-[260px] h-[180px] rounded-2xl bg-[#E0E5EC] shadow-[8px_8px_16px_#a3b1c6,-8px_-8px_16px_#ffffff] p-4">
-        <p className="text-error text-sm">Error: {error}</p>
+        <p className="text-error text-sm">Error: {error.message}</p>
       </div>
     );
 

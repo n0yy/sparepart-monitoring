@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import useSWR from "swr";
 
 interface SpreadsheetData {
   title: string;
@@ -10,40 +10,34 @@ interface SpreadsheetData {
 interface MachineDataState {
   data: SpreadsheetData | null;
   loading: boolean;
-  error: string | null;
+  error: Error | null;
+  mutate: () => void;
 }
 
-export function useMachineData(machineName: string): MachineDataState {
-  const [state, setState] = useState<MachineDataState>({
-    data: null,
-    loading: true,
-    error: null,
-  });
+const fetcher = async (url: string) => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error("Failed to fetch data");
+  }
+  return response.json();
+};
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        setState((prev) => ({ ...prev, loading: true, error: null }));
-        const response = await fetch(`/api/machines/${machineName}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
-        const data: SpreadsheetData = await response.json();
-        setState((prev) => ({ ...prev, data, loading: false, error: null }));
-      } catch (error) {
-        setState((prev) => ({
-          ...prev,
-          loading: false,
-          error: (error as Error).message || "Error fetching data",
-        }));
-      }
+export function useMachineData(machineName: string | null): MachineDataState {
+  const { data, error, isLoading, mutate } = useSWR(
+    machineName ? `/api/machines/${machineName}` : null,
+    fetcher,
+    {
+      revalidateOnFocus: false, // Tidak revalidasi saat focus kembali
+      revalidateIfStale: true, // Revalidasi jika data sudah stale
+      revalidateOnReconnect: true, // Revalidasi saat koneksi kembali
+      dedupingInterval: 60000, // Deduping interval 1 menit
     }
-    fetchData();
-  }, [machineName]);
+  );
 
   return {
-    data: state.data,
-    loading: state.loading,
-    error: state.error,
+    data: data || null,
+    loading: isLoading,
+    error: error as Error | null,
+    mutate,
   };
 }

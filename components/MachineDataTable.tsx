@@ -26,7 +26,7 @@ export default function MachineDataTable({
       {loading ? (
         <p>Loading...</p>
       ) : error ? (
-        <p className="text-red-500">Error: {error}</p>
+        <p className="text-red-500">Error: {error.message}</p>
       ) : (
         <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
           {filteredData && filteredData.length > 0 ? (

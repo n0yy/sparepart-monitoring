@@ -1,10 +1,22 @@
+// app/api/lib/googleSheets.ts
 import { GoogleSpreadsheet, GoogleSpreadsheetRow } from "google-spreadsheet";
 import { JWT } from "google-auth-library";
+import { memoryCache } from "./cache";
 
 export async function fetchSheetData(
   worksheetName: string
 ): Promise<{ title: string; data: any[] }> {
+  // Cek apakah data ada di cache
+  const cacheKey = `sheet_data_${worksheetName}`;
+  const cachedData = memoryCache.get<{ title: string; data: any[] }>(cacheKey);
+
+  if (cachedData) {
+    console.log(`Using cached data for ${worksheetName}`);
+    return cachedData;
+  }
+
   try {
+    console.log(`Fetching fresh data for ${worksheetName}`);
     const doc = new GoogleSpreadsheet(
       process.env.SHEET_ID!,
       new JWT({
@@ -44,7 +56,12 @@ export async function fetchSheetData(
       status: row.get("STATUS"),
     }));
 
-    return { title: doc.title, data };
+    const result = { title: doc.title, data };
+
+    // Simpan hasil di cache selama 15 menit
+    memoryCache.set(cacheKey, result);
+
+    return result;
   } catch (error) {
     throw new Error(
       `Error fetching data from worksheet "${worksheetName}": ${

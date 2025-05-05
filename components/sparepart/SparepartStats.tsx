@@ -19,7 +19,6 @@ interface SparepartStatsProps extends MachineProps {
 export default function SparepartStats({
   machine,
   machineNumber,
-  spreadsheetData,
   onOpenTotalSparepart,
   onOpenSparepart14Days,
 }: SparepartStatsProps) {

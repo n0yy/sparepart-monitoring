@@ -14,7 +14,7 @@ export default function Login() {
         <header className="mb-8 flex flex-col gap-3 text-start">
           <h1 className="text-4xl font-bold text-gray-800">Welcome Back!</h1>
           <p className="text-gray-600 text-sm">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               href="/auth/register"
               className="text-blue-600 hover:underline"

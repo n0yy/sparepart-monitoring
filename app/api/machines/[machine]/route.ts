@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { machineConfig } from "../../config/machines";
 import { fetchSheetData } from "../../lib/googleSheets";
 
+export const revalidate = 3600;
+
 export async function GET(
   request: Request,
   context: { params: Promise<{ machine: string }> } // Update the type to reflect that params is a Promise
@@ -20,7 +22,11 @@ export async function GET(
   try {
     const { worksheetName } = machineConfig[machine.toLowerCase()];
     const result = await fetchSheetData(worksheetName);
-    return NextResponse.json(result);
+    return NextResponse.json(result, {
+      headers: {
+        "Cache-Control": "public, s-maxage=3600, state-while-revalidate=86400",
+      },
+    });
   } catch (error) {
     console.error(`Error fetching data for ${machine}:`, error);
     return NextResponse.json(

@@ -68,13 +68,10 @@ export const totalSparepart = (
   machine: string,
   machineNumber: string
 ): number => {
+  console.log(machine.toUpperCase(), machineNumber);
   return (
     spreadsheetData?.data?.filter((row: SparepartRow) => {
-      if (
-        !("lastReplaced" in row) ||
-        !("lifetime" in row) ||
-        row.machine !== `${machine.toUpperCase()} ${machineNumber}`
-      ) {
+      if (row.machine !== `${machine.toUpperCase()} ${machineNumber}`) {
         return false;
       }
       return true;
@@ -90,11 +87,7 @@ export const sparepartWillExpire = (
 ): number => {
   return (
     spreadsheetData?.data?.filter((row: SparepartRow) => {
-      if (
-        !("lastReplaced" in row) ||
-        !("lifetime" in row) ||
-        row.machine !== `${machine.toUpperCase()} ${machineNumber}`
-      )
+      if (row.machine !== `${machine.toUpperCase()} ${machineNumber}`)
         return false;
 
       const days = calculateDaysUntilNextReplacement(row.nextReplacement, true);
@@ -111,11 +104,7 @@ export const sparepartOverdue = (
 ): number => {
   return (
     spreadsheetData?.data?.filter((row: SparepartRow) => {
-      if (
-        !("lastReplaced" in row) ||
-        !("lifetime" in row) ||
-        row.machine !== `${machine.toUpperCase()} ${machineNumber}`
-      )
+      if (row.machine !== `${machine.toUpperCase()} ${machineNumber}`)
         return false;
       return row.status === "Melewati Jadwal Penggantian";
     }).length || 0
@@ -131,8 +120,6 @@ export const sparepartOK = (
   return (
     spreadsheetData?.data?.filter((row: SparepartRow) => {
       if (
-        !("lastReplaced" in row) ||
-        !("lifetime" in row) ||
         !("status" in row) ||
         row.machine !== `${machine.toUpperCase()} ${machineNumber}`
       ) {
@@ -180,11 +167,7 @@ export const getOverdueSpareParts = (
 ) => {
   return data
     ?.filter((row: SparepartRow) => {
-      if (
-        !("lastReplaced" in row) ||
-        !("lifetime" in row) ||
-        row.machine !== `${machine.toUpperCase()} ${machineNumber}`
-      )
+      if (row.machine !== `${machine.toUpperCase()} ${machineNumber}`)
         return false;
       return row.status === "Melewati Jadwal Penggantian";
     })
