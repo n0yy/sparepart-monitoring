@@ -9,7 +9,8 @@ import Tabs from "@/components/Tabs";
 import SparepartStats from "@/components/sparepart/SparepartStats";
 import SparepartDistribution from "@/components/sparepart/SparepartDistribution";
 import OverdueNotifications from "@/components/sparepart/OverdueNotifications";
-import TotalSparepartModal from "@/components/sparepart/TotalSparepartModal";
+import TotalSparepartModal from "@/components/sparepart/modals/TotalSparepartModal";
+import Total14Days from "@/components/sparepart/modals/Total14Days";
 
 const machineTabs = {
   ilapak: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
@@ -26,6 +27,7 @@ export default function MachinePage() {
   const machine = machineName?.toLowerCase();
   const { data: spreadsheetData } = useMachineData(machineName);
   const [openTotalSparepart, setOpenTotalSparepart] = useState(false);
+  const [openSparepart14Days, setOpenSparepart14Days] = useState(false);
 
   if (!machineName || !machineConfig[machine]) {
     return notFound();
@@ -49,6 +51,7 @@ export default function MachinePage() {
         machineNumber={machineNumber}
         spreadsheetData={spreadsheetData!}
         onOpenTotalSparepart={() => setOpenTotalSparepart(true)}
+        onOpenSparepart14Days={() => setOpenSparepart14Days(true)}
       />
 
       {/* Total Sparepart Modal */}
@@ -58,6 +61,16 @@ export default function MachinePage() {
           machineNumber={machineNumber}
           spreadsheetData={spreadsheetData!}
           onClose={() => setOpenTotalSparepart(false)}
+        />
+      )}
+
+      {/* Total 14 Hari lagi yang harus diganti */}
+      {openSparepart14Days && (
+        <Total14Days
+          machine={machine}
+          machineNumber={machineNumber}
+          spreadsheetData={spreadsheetData!}
+          onClose={() => setOpenSparepart14Days(false)}
         />
       )}
 

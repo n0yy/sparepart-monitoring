@@ -20,24 +20,49 @@ export interface MachineProps {
   spreadsheetData: SpreadsheetData;
 }
 
-export const calculateDaysUntilNextReplacement = (nextReplacement: string) => {
-  const [day, month, year] = nextReplacement.split("/");
-  const nextReplacementDate = new Date(
-    Number(year),
-    Number(month) - 1,
-    Number(day)
-  );
-
-  const today = new Date();
-  const timeDiff = nextReplacementDate.getTime() - today.getTime();
-  const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-  if (daysDiff < 0) {
-    return 0;
+export const calculateDaysUntilNextReplacement = (
+  nextReplacement: string | undefined,
+  justNumber = false
+) => {
+  if (!nextReplacement) {
+    return "Belum terjadwal";
   }
-  return `${daysDiff} hari lagi`;
+
+  try {
+    const [day, month, year] = nextReplacement.split("/");
+
+    if (!day || !month || !year) {
+      return "Format tanggal tidak valid";
+    }
+
+    const nextReplacementDate = new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day)
+    );
+
+    if (isNaN(nextReplacementDate.getTime())) {
+      return "Tanggal tidak valid";
+    }
+
+    const today = new Date();
+    const timeDiff = nextReplacementDate.getTime() - today.getTime();
+    const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+    if (daysDiff < 0 && !justNumber) {
+      return "Sudah lewat jadwal";
+    }
+    if (justNumber) {
+      return daysDiff;
+    } else {
+      return `${daysDiff} hari lagi`;
+    }
+  } catch (error) {
+    console.error("Error calculating days until replacement:", error);
+    return "Error perhitungan tanggal";
+  }
 };
 
-// Total Sparepart
 export const totalSparepart = (
   spreadsheetData: SpreadsheetData,
   machine: string,
@@ -63,7 +88,6 @@ export const sparepartWillExpire = (
   machine: string,
   machineNumber: string
 ): number => {
-  const today = new Date();
   return (
     spreadsheetData?.data?.filter((row: SparepartRow) => {
       if (
@@ -73,10 +97,8 @@ export const sparepartWillExpire = (
       )
         return false;
 
-      const nextReplacementDate = new Date(row.nextReplacement);
-      const timeDiff = nextReplacementDate.getTime() - today.getTime();
-      const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-      return daysDiff <= 14;
+      const days = calculateDaysUntilNextReplacement(row.nextReplacement, true);
+      return Number(days) <= 14 && Number(days) > 0;
     }).length || 0
   );
 };

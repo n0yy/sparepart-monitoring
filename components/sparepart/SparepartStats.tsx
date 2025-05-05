@@ -13,6 +13,7 @@ import {
 
 interface SparepartStatsProps extends MachineProps {
   onOpenTotalSparepart: () => void;
+  onOpenSparepart14Days: () => void;
 }
 
 export default function SparepartStats({
@@ -20,6 +21,7 @@ export default function SparepartStats({
   machineNumber,
   spreadsheetData,
   onOpenTotalSparepart,
+  onOpenSparepart14Days,
 }: SparepartStatsProps) {
   return (
     <div className="w-full flex flex-wrap items-center justify-center mt-8 gap-4">
@@ -38,14 +40,19 @@ export default function SparepartStats({
       </div>
 
       {/* Sparepart Akan Habis Umur (<14 hari) */}
-      <SparepartStatus
-        title="Sparepart Akan Habis Umur"
-        subtitle="(<14 hari)"
-        machineName={machine}
-        machineNumber={machineNumber}
-        calcFunc={(data) => sparepartWillExpire(data, machine, machineNumber)}
-        icon={<RiHourglass2Fill size={40} />}
-      />
+      <div
+        className="hover:cursor-pointer hover:scale-105 transition-all duration-300"
+        onClick={onOpenSparepart14Days}
+      >
+        <SparepartStatus
+          title="Sparepart Akan Habis Umur"
+          subtitle="(<14 hari)"
+          machineName={machine}
+          machineNumber={machineNumber}
+          calcFunc={(data) => sparepartWillExpire(data, machine, machineNumber)}
+          icon={<RiHourglass2Fill size={40} />}
+        />
+      </div>
 
       {/* Sparepart Overdue */}
       <SparepartStatus
