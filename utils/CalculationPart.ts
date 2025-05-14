@@ -68,7 +68,6 @@ export const totalSparepart = (
   machine: string,
   machineNumber: string
 ): number => {
-  console.log(machine.toUpperCase(), machineNumber);
   return (
     spreadsheetData?.data?.filter((row: SparepartRow) => {
       if (row.machine !== `${machine.toUpperCase()} ${machineNumber}`) {

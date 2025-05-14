@@ -5,7 +5,10 @@ import {
   calculateDaysUntilNextReplacement,
   filterSparepartsByMachine,
 } from "@/utils/CalculationPart";
-import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa6";
+import { FaSort, FaSortUp, FaSortDown, FaPrint } from "react-icons/fa6";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 
 interface TotalSparepartModalProps extends MachineProps {
   onClose: () => void;
@@ -13,6 +16,9 @@ interface TotalSparepartModalProps extends MachineProps {
 
 // Define a type for sort direction
 type SortDirection = "none" | "asc" | "desc";
+
+// Define available status options
+type StatusOption = "all" | "overdue" | "ok" | "perluDiganti" | "noStatus";
 
 export default function TotalSparepartModal({
   machine,
@@ -23,9 +29,10 @@ export default function TotalSparepartModal({
   const [searchQuery, setSearchQuery] = useState("");
   const [statusSortDirection, setStatusSortDirection] =
     useState<SortDirection>("none");
+  const [selectedStatus, setSelectedStatus] = useState<StatusOption>("all");
 
-  // Get the filtered data
-  const filteredData = filterSparepartsByMachine(
+  // Get the filtered data by search query
+  const searchFilteredData = filterSparepartsByMachine(
     spreadsheetData?.data,
     machine,
     machineNumber,
@@ -41,8 +48,27 @@ export default function TotalSparepartModal({
     return 3; // Default/unknown status
   };
 
+  // Filter data based on selected status
+  const statusFilteredData = searchFilteredData?.filter((row) => {
+    if (selectedStatus === "all") return true;
+    if (selectedStatus === "overdue" && row.status?.includes("Melewati"))
+      return true;
+    if (
+      selectedStatus === "ok" &&
+      (row.status?.includes("Hari") || row.status?.includes("OK"))
+    )
+      return true;
+    if (
+      selectedStatus === "perluDiganti" &&
+      (row.status?.includes("Segera") || row.status?.includes("Perlu"))
+    )
+      return true;
+    if (selectedStatus === "noStatus" && !row.status) return true;
+    return false;
+  });
+
   // Sort the data based on status
-  const sortedData = [...(filteredData || [])].sort((a, b) => {
+  const sortedData = [...(statusFilteredData || [])].sort((a, b) => {
     if (statusSortDirection === "none") {
       return 0; // No sorting
     }
@@ -104,13 +130,125 @@ export default function TotalSparepartModal({
     return <FaSort />;
   };
 
+  // Function to generate and download PDF
+  const handleExportToPdf = () => {
+    try {
+      // Create new jsPDF instance
+      const doc = new jsPDF();
+
+      // Add title
+      doc.setFontSize(18);
+      doc.text(`Sparepart ${machine} ${machineNumber}`, 14, 22);
+      doc.setFontSize(12);
+      doc.text(`Tanggal: ${new Date().toLocaleDateString("id-ID")}`, 14, 30);
+
+      // Define the table columns
+      const tableColumn = ["Kode", "Part", "Kategori", "Penggantian Terakhir"];
+
+      // Define the table rows
+      const tableRows = sortedData.map((row) => [
+        row.codePart,
+        row.part,
+        row.category,
+        row.lastReplaced,
+        `${row.lifetime} Bulan`,
+        calculateDaysUntilNextReplacement(row.nextReplacement).toString(),
+        row.status || "Tidak Ada Status",
+      ]);
+
+      // Generate the table manually if autoTable is not available
+      if (typeof autoTable !== "function") {
+        // Fallback to basic table
+        let yPos = 40;
+        const cellPadding = 5;
+        const cellHeight = 10;
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const colWidths = [20, 40, 25, 30, 20, 20, 30];
+        const totalWidth = colWidths.reduce((a, b) => a + b, 0);
+        const startX = (pageWidth - totalWidth) / 2;
+
+        // Draw header
+        doc.setFillColor(66, 66, 66);
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(10);
+
+        let currentX = startX;
+        tableColumn.forEach((col, i) => {
+          doc.rect(currentX, yPos, colWidths[i], cellHeight, "F");
+          doc.text(
+            col,
+            currentX + cellPadding,
+            yPos + cellHeight - cellPadding
+          );
+          currentX += colWidths[i];
+        });
+
+        // Draw rows
+        yPos += cellHeight;
+        doc.setTextColor(0, 0, 0);
+
+        tableRows.forEach((row, rowIndex) => {
+          // Alternate row coloring
+          if (rowIndex % 2 === 0) {
+            doc.setFillColor(245, 245, 245);
+            currentX = startX;
+            row.forEach((cell, i) => {
+              doc.rect(currentX, yPos, colWidths[i], cellHeight, "F");
+              currentX += colWidths[i];
+            });
+          }
+
+          currentX = startX;
+          row.forEach((cell, i) => {
+            doc.text(
+              String(cell).substring(0, 15) +
+                (String(cell).length > 15 ? "..." : ""),
+              currentX + cellPadding,
+              yPos + cellHeight - cellPadding
+            );
+            currentX += colWidths[i];
+          });
+
+          yPos += cellHeight;
+
+          // Check if we need a new page
+          if (yPos > doc.internal.pageSize.getHeight() - 20) {
+            doc.addPage();
+            yPos = 20;
+          }
+        });
+      } else {
+        autoTable(doc, {
+          head: [tableColumn],
+          body: tableRows,
+          columns: [
+            { header: "Kode", dataKey: 0 },
+            { header: "Part", dataKey: 1 },
+            { header: "Kategori", dataKey: 2 },
+            { header: "Penggantian Terakhir", dataKey: 3 },
+          ],
+        });
+      }
+
+      // Save the PDF
+      doc.save(
+        `sparepart_${machine}_${machineNumber}_${new Date()
+          .toISOString()
+          .slice(0, 10)}.pdf`
+      );
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("Gagal membuat PDF. Silakan cek console untuk detail error.");
+    }
+  };
+
   return (
     <>
       <div className="fixed inset-0 bg-white/30 backdrop-blur z-40" />
       <Modal title="Total Sparepart Terpantau" onClose={onClose}>
-        {/* Form Pencarian */}
+        {/* Form Pencarian dan Filter */}
         <div className="mb-4">
-          <div className="flex gap-2">
+          <div className="flex flex-col lg:flex-row gap-2 mb-2">
             <input
               type="text"
               placeholder="Cari part, kode, atau kategori..."
@@ -118,10 +256,33 @@ export default function TotalSparepartModal({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+            <select
+              className="select select-bordered lg:w-60"
+              value={selectedStatus}
+              onChange={(e) =>
+                setSelectedStatus(e.target.value as StatusOption)
+              }
+            >
+              <option value="all">Semua Status</option>
+              <option value="overdue">Overdue</option>
+              <option value="ok">OK</option>
+              <option value="perluDiganti">Perlu Diganti</option>
+              <option value="noStatus">Tidak Ada Status</option>
+            </select>
+
+            <button
+              onClick={handleExportToPdf}
+              className="btn btn-primary flex items-center gap-2"
+            >
+              <FaPrint /> Export PDF
+            </button>
+          </div>
+          <div className="text-sm text-gray-500">
+            {sortedData.length} data ditemukan
           </div>
         </div>
 
-        <div className="overflow-y-auto">
+        <div className="overflow-y-auto max-h-[60vh]">
           <table className="table w-full">
             <thead>
               <tr>
