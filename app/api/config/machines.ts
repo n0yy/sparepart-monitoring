@@ -14,4 +14,7 @@ export const machineConfig: Record<string, { worksheetName: string }> = {
   unifill: {
     worksheetName: "UNIFILL",
   },
+  jihcheng: {
+    worksheetName: "JIHCHENG",
+  },
 };

@@ -63,12 +63,17 @@ export default function Sidebar() {
                 <li>
                   <NavLink href="/dashboard/lifetime/jinsung">Jinsung</NavLink>
                 </li>
+                <li>
+                  <NavLink href="/dashboard/lifetime/jihcheng">
+                    Jihcheng
+                  </NavLink>
+                </li>
               </ul>
             </details>
           </li>
           {/* ITEM 2 */}
           <li>
-            <NavLink href="/kanban">Kanban Sparepart</NavLink>
+            <NavLink href="/dashboard/kanban">Kanban Sparepart</NavLink>
           </li>
           {/* ITEM 3 */}
           <li>

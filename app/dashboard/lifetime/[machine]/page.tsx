@@ -12,22 +12,11 @@ import OverdueNotifications from "@/components/sparepart/OverdueNotifications";
 import TotalSparepartModal from "@/components/sparepart/modals/TotalSparepartModal";
 import Total14Days from "@/components/sparepart/modals/Total14Days";
 import { SparepartRow } from "@/utils/CalculationPart";
-import {
-  BarChart,
-  Bar,
-  Rectangle,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
 
 const machineTabs = {
   ilapak: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
   sig: ["5", "6"],
-  chimei: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
+  chimei: ["1", "2", "3A", "4B", "5", "5B", "8A", "9A", "10", "11", "12"],
   jinsung: ["1", "2", "3", "4", "5"],
   unifill: ["A", "B"],
 };
@@ -51,7 +40,7 @@ export default function MachinePage() {
     return notFound();
   }
 
-  const tabs = machineTabs[machine as keyof typeof machineTabs] || ["1"];
+  const tabs = machineTabs[machine as keyof typeof machineTabs] || [];
   const machineNumber = searchParams.get("machine") || tabs[0];
 
   useEffect(() => {
@@ -101,14 +90,18 @@ export default function MachinePage() {
     );
   }
 
+  console.log(spreadsheetData?.data);
+
   return (
     <section className="flex items-center flex-col p-10">
       {/* Tabs */}
-      <Tabs
-        tabs={tabs}
-        basePath={`/dashboard/lifetime/${machine}`}
-        labelPrefix={machine.toUpperCase()}
-      />
+      {tabs.length > 0 && (
+        <Tabs
+          tabs={tabs}
+          basePath={`/dashboard/lifetime/${machine}`}
+          labelPrefix={machine.toUpperCase()}
+        />
+      )}
 
       {/* Summary Stats */}
       <SparepartStats

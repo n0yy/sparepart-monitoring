@@ -26,14 +26,18 @@ export default function TotalSparepartModal({
   spreadsheetData,
   onClose,
 }: TotalSparepartModalProps) {
+  console.log("machine : ", machine);
+  console.log("machine NUmber : ", machineNumber);
+  console.log("spreadsheetData : ", spreadsheetData);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusSortDirection, setStatusSortDirection] =
     useState<SortDirection>("none");
   const [selectedStatus, setSelectedStatus] = useState<StatusOption>("all");
 
   // Get the filtered data by search query
+  // Di dalam komponen TotalSparepartModal
   const searchFilteredData = filterSparepartsByMachine(
-    spreadsheetData?.data,
+    spreadsheetData?.data || [],
     machine,
     machineNumber,
     searchQuery
@@ -48,8 +52,15 @@ export default function TotalSparepartModal({
     return 3; // Default/unknown status
   };
 
+  // DEBUG: Cek hasil filter pertama
+  console.log("searchFilteredData:", searchFilteredData);
+  console.log("searchFilteredData length:", searchFilteredData?.length);
+
   // Filter data based on selected status
   const statusFilteredData = searchFilteredData?.filter((row) => {
+    console.log("Checking row:", row); // DEBUG: Cek setiap row
+    console.log("Row status:", row.status); // DEBUG: Cek status setiap row
+
     if (selectedStatus === "all") return true;
     if (selectedStatus === "overdue" && row.status?.includes("Melewati"))
       return true;
@@ -67,10 +78,15 @@ export default function TotalSparepartModal({
     return false;
   });
 
+  // DEBUG: Cek hasil filter status
+  console.log("selectedStatus:", selectedStatus);
+  console.log("statusFilteredData:", statusFilteredData);
+  console.log("statusFilteredData length:", statusFilteredData?.length);
+
   // Sort the data based on status
   const sortedData = [...(statusFilteredData || [])].sort((a, b) => {
     if (statusSortDirection === "none") {
-      return 0; // No sorting
+      return 0;
     }
 
     const aPriority = getStatusPriority(a.status);
@@ -80,6 +96,11 @@ export default function TotalSparepartModal({
       ? aPriority - bPriority
       : bPriority - aPriority;
   });
+
+  // DEBUG: Cek hasil final
+  console.log("sortedData:", sortedData);
+  console.log("sortedData length:", sortedData.length);
+  console.log("=== DEBUG END ===");
 
   // Toggle sort direction when column header is clicked
   const toggleStatusSort = () => {

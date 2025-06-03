@@ -129,34 +129,27 @@ export const sparepartOK = (
   );
 };
 
-export const filterSparepartsByMachine = (
+export function filterSparepartsByMachine(
   data: SparepartRow[] | undefined,
   machine: string,
-  machineNumber: string,
-  searchQuery: string = ""
-) => {
-  return data?.filter((row: SparepartRow) => {
-    // Filter berdasarkan mesin
-    if (
-      !("lastReplaced" in row) ||
-      !("lifetime" in row) ||
-      row.machine !== `${machine.toUpperCase()} ${machineNumber}`
-    )
-      return false;
+  machineNumber: number,
+  searchQuery: string
+): SparepartRow[] {
+  if (!data) return [];
 
-    // Filter berdasarkan pencarian
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      return (
-        row.codePart.toLowerCase().includes(query) ||
-        row.part.toLowerCase().includes(query) ||
-        row.category.toLowerCase().includes(query)
-      );
-    }
+  const formattedMachine = `${machine.toUpperCase()} ${machineNumber}`;
 
-    return true;
+  return data.filter((row) => {
+    const matchesMachine = row.machine?.toUpperCase() === formattedMachine;
+    const matchesSearch = ["part", "codePart", "category"].some((field) =>
+      (row as { [key: string]: any })[field]
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase())
+    );
+
+    return matchesMachine && matchesSearch;
   });
-};
+}
 
 export const getOverdueSpareParts = (
   data: SparepartRow[] | undefined,

@@ -1,4 +1,3 @@
-// app/api/lib/googleSheets.ts
 import { GoogleSpreadsheet, GoogleSpreadsheetRow } from "google-spreadsheet";
 import { JWT } from "google-auth-library";
 import { memoryCache } from "./cache";
@@ -43,18 +42,35 @@ export async function fetchSheetData(
 
     await sheet.loadHeaderRow(2); // Header ada di baris ke-2
     const rows = await sheet.getRows();
+    let data = [];
 
-    const data = rows.map((row: GoogleSpreadsheetRow) => ({
-      machine: row.get("Mesin"),
-      codePart: row.get("Kode Part"),
-      part: row.get("Part"),
-      quantity: row.get("Qty"),
-      category: row.get("Category"),
-      lastReplaced: row.get("Penggantian Terakhir"),
-      lifetime: row.get("Lifetime (Bulan)"),
-      nextReplacement: row.get("Penggantian Selanjutnya"),
-      status: row.get("STATUS"),
-    }));
+    if (worksheetName !== "KANBAN") {
+      data = rows.map((row: GoogleSpreadsheetRow) => ({
+        machine: row.get("Mesin"),
+        codePart: row.get("Kode Part"),
+        part: row.get("Part"),
+        quantity: row.get("Qty"),
+        category: row.get("Category"),
+        lastReplaced: row.get("Penggantian Terakhir"),
+        lifetime: row.get("Lifetime (Bulan)"),
+        nextReplacement: row.get("Penggantian Selanjutnya"),
+        status: row.get("STATUS"),
+      }));
+    } else {
+      data = rows.map((row: GoogleSpreadsheetRow) => ({
+        part: row.get("Part"),
+        codePart: row.get("Kode Part"),
+        onHand: row.get("On Hand Inventory"),
+        reorderMin: row.get("Reorder Min"),
+        leadTime: row.get("Leadtime (Hari)"),
+        vendor: row.get("Supplier"),
+        status: row.get("Status"),
+        deadlineOrder: row.get("Deadline Pemesanan"),
+        forMonth: row.get("Untuk Bulan"),
+        quantityWillBeOrder: row.get("Qty yang dipesan"),
+        quantityNextNeeded: row.get("Qty Kebutuhan Selanjutnya"),
+      }));
+    }
 
     const result = { title: doc.title, data };
 
